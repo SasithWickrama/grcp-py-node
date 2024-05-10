@@ -50,6 +50,7 @@ class NodeService(node_pb2_grpc.NodeServiceServicer):
                 if target_node_ip:
                     self.send_to_node(target_node_id, request, target_node_ip)
                     print("[{}] Data forwarded to receiver node {}.".format(self.node_name, target_node_id))
+                    print("[{}] Updated value table fro StoreData method: {}".format(self.node_name, self.value_table))
                 else:
                     print("[{}] Error: Unable to find IP address of node {}.".format(self.node_name, target_node_id))
 
