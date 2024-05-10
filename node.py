@@ -21,13 +21,24 @@ class NodeService(node_pb2_grpc.NodeServiceServicer):
             new_node_name = request.node_name
             new_node_ip = request.ip_address
             
-            self.connected_nodes[new_node_id] = (new_node_name, new_node_ip)
-            print("[{}] Updated connected nodes when JoinCluster: {}".format(self.node_name, self.connected_nodes))  # Print connected_nodes
-            self.update_role()
+            if new_node_id in self.connected_nodes:
+                print("[{}] Node {} already exists in connected_nodes.".format(self.node_name, new_node_id))
+            else:
+                self.connected_nodes[new_node_id] = (new_node_name, new_node_ip)
+                print("[{}] Updated connected nodes when JoinCluster: {}".format(self.node_name, self.connected_nodes))  
+                self.update_role()
 
             print("[{}] Node {} ({}) joined the cluster.".format(self.node_name, new_node_id, new_node_name))
             print("[{}] Updated connected nodes: {}".format(self.node_name, self.connected_nodes))
             print("[{}] Updated value table: {}".format(self.node_name, self.value_table))
+
+        return node_pb2.JoinClusterResponse()
+    except Exception as e:
+        print("Exception occurred in JoinCluster: {}".format(e))
+        context.set_code(grpc.StatusCode.INTERNAL)
+        context.set_details("Error occurred: {}".format(e))
+        return node_pb2.JoinClusterResponse()
+
 
             return node_pb2.JoinClusterResponse()
         except Exception as e:
@@ -73,17 +84,20 @@ class NodeService(node_pb2_grpc.NodeServiceServicer):
                     print("[{}] Retrieve request forwarded to hasher node {}.".format(self.node_name, target_node_id))
                 else:
                     print("[{}] Error: Unable to find IP address of node {}.".format(self.node_name, target_node_id))
+                    context.set_code(grpc.StatusCode.INTERNAL)
+                    context.set_details("Unable to find IP address of node {}".format(target_node_id))
+                    return node_pb2.RetrieveDataResponse()  # Return an empty response with error status
             else:
                 # If hasher node, retrieve data from local table
                 if request.key in self.value_table:
                     return node_pb2.RetrieveDataResponse(value=self.value_table[request.key])
                 else:
-                    return node_pb2.RetrieveDataResponse()
+                    return node_pb2.RetrieveDataResponse()  # Return an empty response
         except Exception as e:
             print("Exception occurred in RetrieveData: {}".format(e))
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details("Error occurred: {}".format(e))
-            return node_pb2.RetrieveDataResponse()
+            return node_pb2.RetrieveDataResponse()  # Return an empty response with error status
 
     def compute_hash(self, key):
         short_key = key[:10]  # Take only the first 10 characters of the key
@@ -175,7 +189,7 @@ def start_server(node_id, node_name, ip_address):
         print("Exception occurred in start_server: {}".format(e))
 
 if __name__ == '__main__':
-    # Iterate through each node ID from 0 to 4
+
     for node_id in range(1):
         # Generate node name and IP address
         node_name = 'Node_{}'.format(node_id)

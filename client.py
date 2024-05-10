@@ -9,7 +9,8 @@ def join_cluster(target_node_ip, node_id, node_name):
         with grpc.insecure_channel(target_node_ip) as channel:
             stub = node_pb2_grpc.NodeServiceStub(channel)
             response = stub.JoinCluster(node_pb2.JoinClusterRequest(node_id=str(node_id), node_name=node_name, ip_address=target_node_ip))
-            print("Joined cluster successfully.")
+            print("Response - Joined cluster successfully.")
+            print("Response status:", response)
     except grpc.RpcError as e:
         print("gRPC error join_cluster:", e.details())
 
@@ -60,36 +61,36 @@ def get_connected_node_ip(target_node_ip, node_id):
         print("gRPC error get_connected_node_ip:", e.details())
 
 if __name__ == "__main__":
-    # Example target node IP address
+    # target node IP address
     target_node_ip_template = "172.26.0.{}:50051"
     node_name_template = "Node{}"
 
-    # Loop through each node from 0 to 4
+
     for node_id in range(1, 6):
         # Your code here
         print("Node ID:", node_id)
-        # Example target node IP address
+        # target node IP address
         target_node_ip = "172.26.0.{}:50051".format(node_id)  
         node_name = "Node{}".format(node_id)
 
         # Join the cluster
         join_cluster(target_node_ip, node_id, node_name)
 
-        # Example key to retrieve
-        key_to_retrieve = "SampleKey"  # Your key to retrieve
+        # key to retrieve
+        key_to_retrieve = "SampleKey"  
         retrieve_data(target_node_ip, key_to_retrieve)
 
-        # Example key and value to send
-        key_to_send = "SampleKey"  # Your key to send
-        value_to_send = "c05bb7fd2f3f0b1ad4465cf5e9c3b014"  # Your value to send
+        # key and value to send
+        key_to_send = "SampleKey"  
+        value_to_send = "c05bb7fd2f3f0b1ad4465cf5e9c3b014" 
         send_to_node(target_node_ip, key_to_send, value_to_send)
 
-        # Example new node IP address
-        new_node_ip = "172.26.0.7:50051"  # Change this to the IP of the new node
+        # new node IP address
+        new_node_ip = "172.26.0.2:50051"  
         notify_node_joined(target_node_ip, node_id, node_name, new_node_ip)
 
-        # Example node ID to get connected node IP
-        node_id_to_get_ip = "1"  # Your node ID to get connected node IP (converted to string)
+        # node ID to get connected node IP
+        node_id_to_get_ip = "1"  # node ID to get connected node IP (converted to string)
         connected_node_ip = get_connected_node_ip(target_node_ip, node_id_to_get_ip)
         if connected_node_ip:
             print("Connected node IP:", connected_node_ip)
