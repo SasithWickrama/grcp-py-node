@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  node0:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "50051:50051"
+    container_name: node0
+    networks:
+      - my_network
+
+  node1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "50052:50051"
+    container_name: node1
+    networks:
+      - my_network
+
+  node2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "50053:50051"
+    container_name: node2
+    networks:
+      - my_network
+
+  node3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "50054:50051"
+    container_name: node3
+    networks:
+      - my_network
+
+  node4:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "50055:50051" #
+    container_name: node4
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge

@@ -1,0 +1,20 @@
+import grpc
+import node_pb2
+import node_pb2_grpc
+import socket
+
+def send_data_to_node(target_node_ip, key, value):
+    try:
+        with grpc.insecure_channel(target_node_ip) as channel:
+            stub = node_pb2_grpc.NodeServiceStub(channel)
+            response = stub.StoreData(node_pb2.StoreDataRequest(key=key, value=value))
+            print("Data sent successfully to node at IP:", target_node_ip)
+    except grpc.RpcError as e:
+        print("gRPC error:", e.details())
+
+if __name__ == "__main__":
+    # Example target node IP address
+    target_node_ip = "172.26.0.3:50051"  # Change this to the IP of the target node
+    key_to_send = "ExampleKey"  # Your key to be sent
+    value_to_send = "c05bb7fd2f3f0b1ad4465cf5e9c3b014"  # Your value to be sent
+    send_data_to_node(target_node_ip, key_to_send, value_to_send)
