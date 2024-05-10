@@ -22,6 +22,7 @@ class NodeService(node_pb2_grpc.NodeServiceServicer):
             new_node_ip = request.ip_address
             
             self.connected_nodes[new_node_id] = (new_node_name, new_node_ip)
+            print("[{}] Updated connected nodes when JoinCluster: {}".format(self.node_name, self.connected_nodes))  # Print connected_nodes
             self.update_role()
 
             print("[{}] Node {} ({}) joined the cluster.".format(self.node_name, new_node_id, new_node_name))
@@ -91,8 +92,15 @@ class NodeService(node_pb2_grpc.NodeServiceServicer):
         return hash_value
         
     def update_role(self):
+        previous_role = self.role
         self.role = "receiver" if len(self.connected_nodes) % 2 == 1 and len(self.connected_nodes) != 0 else "hasher"
         print("[{}] Updated role: {}".format(self.node_name, self.role))
+        
+        # Check if role has changed
+        if previous_role != self.role:
+            return "Role updated to {}".format(self.role)
+        else:
+            return "Role remains unchanged as {}".format(self.role)
 
     def broadcast_join_message(self, new_node_id, new_node_name, new_node_ip):
         for existing_node_id, existing_node_info in self.connected_nodes.items():
