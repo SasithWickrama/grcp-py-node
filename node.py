@@ -21,24 +21,21 @@ class NodeService(node_pb2_grpc.NodeServiceServicer):
             new_node_name = request.node_name
             new_node_ip = request.ip_address
             
+            print("Received new node ID:", new_node_id)
+            print("Received new node name:", new_node_name)
+            print("Received new node IP address:", new_node_ip)
+            
             if new_node_id in self.connected_nodes:
                 print("[{}] Node {} already exists in connected_nodes.".format(self.node_name, new_node_id))
             else:
                 self.connected_nodes[new_node_id] = (new_node_name, new_node_ip)
                 print("[{}] Updated connected nodes when JoinCluster: {}".format(self.node_name, self.connected_nodes))  
                 self.update_role()
+                self.broadcast_join_message(new_node_id, new_node_name, new_node_ip)  # Call broadcast_join_message here
 
-            print("[{}] Node {} ({}) joined the cluster.".format(self.node_name, new_node_id, new_node_name))
-            print("[{}] Updated connected nodes: {}".format(self.node_name, self.connected_nodes))
-            print("[{}] Updated value table: {}".format(self.node_name, self.value_table))
-
-        return node_pb2.JoinClusterResponse()
-    except Exception as e:
-        print("Exception occurred in JoinCluster: {}".format(e))
-        context.set_code(grpc.StatusCode.INTERNAL)
-        context.set_details("Error occurred: {}".format(e))
-        return node_pb2.JoinClusterResponse()
-
+            print("[{}] Node {} ({}) joined the cluster.".format(new_node_name, new_node_id, new_node_name))
+            print("[{}] Updated connected nodes: {}".format(new_node_name, self.connected_nodes))
+            print("[{}] Updated value table: {}".format(new_node_name, self.value_table))
 
             return node_pb2.JoinClusterResponse()
         except Exception as e:
@@ -46,6 +43,12 @@ class NodeService(node_pb2_grpc.NodeServiceServicer):
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details("Error occurred: {}".format(e))
             return node_pb2.JoinClusterResponse()
+
+        except Exception as e:
+            print("Exception occurred in JoinCluster: {}".format(e))
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details("Error occurred: {}".format(e))
+            return node_pb2.JoinClusterResponse()    
 
     def StoreData(self, request, context):
         try:
@@ -136,11 +139,17 @@ class NodeService(node_pb2_grpc.NodeServiceServicer):
         print("[{}] Data sent to node {}.".format(self.node_name, node_id))
 
     def get_target_receiver_node_id(self, hash_key):
+        if not self.connected_nodes:
+            print("[{}] Error: No connected nodes available.".format(self.node_name))
+            return None
         receiver_node_id = self.compute_hash(hash_key) % len(self.connected_nodes)
         print("[{}] Target receiver node ID for hash key '{}' is {}.".format(self.node_name, hash_key, receiver_node_id))
         return receiver_node_id
 
     def get_target_hasher_node_id(self, hash_key):
+        if not self.connected_nodes:
+            print("[{}] Error: No connected nodes available.".format(self.node_name))
+            return None
         hasher_node_id = (self.compute_hash(hash_key) + 1) % len(self.connected_nodes)
         print("[{}] Target hasher node ID for hash key '{}' is {}.".format(self.node_name, hash_key, hasher_node_id))
         return hasher_node_id
@@ -189,7 +198,7 @@ def start_server(node_id, node_name, ip_address):
         print("Exception occurred in start_server: {}".format(e))
 
 if __name__ == '__main__':
-
+    # Iterate through each node ID from 0 to 4
     for node_id in range(1):
         # Generate node name and IP address
         node_name = 'Node_{}'.format(node_id)

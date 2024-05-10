@@ -100,29 +100,29 @@ if __name__ == "__main__":
 
 '''
 if __name__ == "__main__":
-    # Example target node IP address
+    # target node IP address
     target_node_ip = "172.26.0.3:50051"  
-    node_id = 0  # Your node ID
-    node_name = "Node5"  # Your node name
+    node_id = 2  # node ID
+    node_name = "Node2"  # node name
 
     # Join the cluster
     join_cluster(target_node_ip, node_id, node_name)
 
-    # Example key to retrieve
-    key_to_retrieve = "SampleKey"  # Your key to retrieve
+    # key to retrieve
+    key_to_retrieve = "SampleKey"  # key to retrieve
     retrieve_data(target_node_ip, key_to_retrieve)
 
-    # Example key and value to send
-    key_to_send = "SampleKey"  # Your key to send
-    value_to_send = "c05bb7fd2f3f0b1ad4465cf5e9c3b014"  # Your value to send
+    # key and value to send
+    key_to_send = "SampleKey"  # key to send
+    value_to_send = "c05bb7fd2f3f0b1ad4465cf5e9c3b014"  # value to send
     send_to_node(target_node_ip, key_to_send, value_to_send)
 
-    # Example new node IP address
+    # new node IP address
     new_node_ip = "172.26.0.4:50051"  # Change this to the IP of the new node
     notify_node_joined(target_node_ip, node_id, node_name, new_node_ip)
 
-    # Example node ID to get connected node IP
-    node_id_to_get_ip = "1"  # Your node ID to get connected node IP (converted to string)
+    # node ID to get connected node IP
+    node_id_to_get_ip = "1"  # node ID to get connected node IP (converted to string)
     connected_node_ip = get_connected_node_ip(target_node_ip, node_id_to_get_ip)
     if connected_node_ip:
         print("Connected node IP:", connected_node_ip)
